@@ -8,11 +8,13 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+	<!--<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />-->
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
 <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.js" integrity="sha256-kmsDsaE/T0gIJXfV7sZF1SwQAdO2AU5DAkZwwnx46n4=" crossorigin="anonymous"></script>
+
 
 	<style>
 		html, body, #map{
@@ -33,7 +35,7 @@
 
 <script type="text/javascript">
   // initialize the map
-    var map = L.map('map').setView([50, 14.5], 8);
+    var map = L.map('map').setView([50, 14.5], 10);
 
     // load a tile layer
 		base = L.tileLayer('http://a.tile.stamen.com/toner/{z}/{x}/{y}.png', {
@@ -42,13 +44,17 @@
 	  attribution: 'PodkladovĂˇ mapa &copy; <a href="https://www.mapbox.com/">Mapbox</a>, &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>, zdroj dat <a href="http://www.ekcr.cz/">ExekutorskĂˇ komora ÄŚR</a>, kartografickĂ© zpracovĂˇnĂ­ <a href="mailto:bara.so@email.cz">BĂˇra SoukupovĂˇ</a>',
 	});
 
+
+
+
 	map.addLayer(base);
 
-    // load GeoJSON from an external file
-    $.getJSON("okrsky.geojson",function(data){
-      // add GeoJSON layer to the map once the file is loaded
-      L.geoJson(data).addTo(map);
-    });
+
+var okrsky = new L.GeoJSON.AJAX("okrsky.geojson", {
+	 style: style,
+	 onEachFeature: onEachFeature
+ });
+ okrsky.addTo(map);
 
 		function resetView() {
   map.fitBounds([
@@ -72,8 +78,8 @@ resetView();
 	};
 
 	info.update = function (props) {
-		this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
-			'<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+		this._div.innerHTML = '<h4>Piráti PSP</h4>' +  (props ?
+			'<b>' + props.OBEC_CISLO + '</b><br />' + props.ps17_pirati_p + ' %'
 			: 'Hover over a state');
 	};
 
@@ -82,13 +88,13 @@ resetView();
 
 	// get color depending on population density value
 	function getColor(d) {
-		return d > 1000 ? '#800026' :
-				d > 500  ? '#BD0026' :
-				d > 200  ? '#E31A1C' :
-				d > 100  ? '#FC4E2A' :
-				d > 50   ? '#FD8D3C' :
-				d > 20   ? '#FEB24C' :
-				d > 10   ? '#FED976' :
+		return d > 0.3 ? '#800026' :
+				d > 0.25  ? '#BD0026' :
+				d > 0.2  ? '#E31A1C' :
+				d > 0.15  ? '#FC4E2A' :
+				d > 0.12   ? '#FD8D3C' :
+				d > 0.1   ? '#FEB24C' :
+				d > 0.5   ? '#FED976' :
 							'#FFEDA0';
 	}
 
@@ -99,7 +105,7 @@ resetView();
 			color: 'white',
 			dashArray: '3',
 			fillOpacity: 0.7,
-			fillColor: getColor(feature.properties.density)
+			fillColor: getColor(feature.properties.ps17_pirati_p)
 		};
 	}
 
@@ -120,27 +126,27 @@ resetView();
 		info.update(layer.feature.properties);
 	}
 
-	var geojson;
+	//var geojson;
 
 	function resetHighlight(e) {
-		geojson.resetStyle(e.target);
+		okrsky.resetStyle(e.target);
 		info.update();
 	}
 
-	function zoomToFeature(e) {
+/*	function zoomToFeature(e) {
 		map.fitBounds(e.target.getBounds());
-	}
+	}*/
 
 	function onEachFeature(feature, layer) {
 		layer.on({
 			mouseover: highlightFeature,
 			mouseout: resetHighlight,
-			click: zoomToFeature
+		//	click: zoomToFeature
 		});
 	}
 
 
-	var legend = L.control({position: 'bottomright'});
+/*	var legend = L.control({position: 'bottomright'});
 
 	legend.onAdd = function (map) {
 
@@ -162,7 +168,7 @@ resetView();
 		return div;
 	};
 
-	legend.addTo(map);
+	legend.addTo(map);*/
 
 </script>
 
